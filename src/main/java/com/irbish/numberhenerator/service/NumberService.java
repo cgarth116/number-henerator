@@ -5,7 +5,7 @@ import com.irbish.numberhenerator.additional.DefaultString;
 public interface NumberService {
 
     /**
-     * Создает случайный номер по шаблону
+     * Создает случайный номер
      * @param region код региона
      * @return номер если возможно, в противном случае сообщение {@link DefaultString#THE_NUMBER_ARE_OVER}
      * или {@link DefaultString#REGION_NOT_FOUND} если регион не найден

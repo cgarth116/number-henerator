@@ -1,6 +1,8 @@
 package com.irbish.numberhenerator.service;
 
 import com.irbish.numberhenerator.repositories.DictionaryLetterCombinations;
+import com.irbish.numberhenerator.repositories.DictionaryLetterCombinationsImpl;
+import com.irbish.numberhenerator.repositories.NumberBase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +24,7 @@ import static org.mockito.Mockito.when;
 public class NumberServiceImplTests {
 
     @Mock
-    private HashMap<String, Set<String>> numberBase;
+    private NumberBase numberBase;
     @Mock
     private  DictionaryLetterCombinations dictionary;
 
@@ -30,7 +32,7 @@ public class NumberServiceImplTests {
 
     @BeforeEach
     void setUp(){
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         numberService = new NumberServiceImpl(numberBase, dictionary);
     }
 
@@ -45,10 +47,10 @@ public class NumberServiceImplTests {
     @MethodSource("numberNotGeneratedRandomNumber")
     @DisplayName("getRandomNumber номер не сгенерирован")
     void getRandomNumberNotGeneratedNumberReturnExpectedResult(String expected, String region, Boolean isRegion){
-        List<String> listDictionary = new DictionaryLetterCombinations().getDictionary();
+        List<String> listDictionary = new DictionaryLetterCombinationsImpl().getDictionary();
 
-        when(numberBase.containsKey(region)).thenReturn(isRegion);
-        when(numberBase.get(region)).thenReturn(new HashSet<>(listDictionary));
+        when(numberBase.isRegion(region)).thenReturn(isRegion);
+        when(numberBase.getRegionBase(region)).thenReturn(new HashSet<>(listDictionary));
         when((dictionary.getDictionary())).thenReturn(listDictionary);
 
         Assertions.assertEquals(expected, numberService.getRandomNumber(region));
@@ -57,10 +59,10 @@ public class NumberServiceImplTests {
     @Test
     @DisplayName("getRandomNumber номер сгенерирован")
     void getRandomNumberReturnExpectedResult(){
-        List<String> listDictionary = new DictionaryLetterCombinations().getDictionary();
+        List<String> listDictionary = new DictionaryLetterCombinationsImpl().getDictionary();
 
-        when(numberBase.containsKey(REGION_116RUS)).thenReturn(true);
-        when(numberBase.get(REGION_116RUS)).thenReturn(new HashSet<>());
+        when(numberBase.isRegion(REGION_116RUS)).thenReturn(true);
+        when(numberBase.getRegionBase(REGION_116RUS)).thenReturn(new HashSet<>());
         when((dictionary.getDictionary())).thenReturn(listDictionary);
 
         Assertions.assertNotNull(numberService.getRandomNumber(REGION_116RUS));
@@ -69,7 +71,7 @@ public class NumberServiceImplTests {
     @Test
     @DisplayName("getNextNumber регион не найден")
     void getNextNumberNotGeneratedReturnExpectedResult(){
-        when(numberBase.containsKey("Another region")).thenReturn(false);
+        when(numberBase.isRegion("Another region")).thenReturn(false);
 
         Assertions.assertEquals(REGION_NOT_FOUND, numberService.getRandomNumber("Another region"));
     }
@@ -77,10 +79,10 @@ public class NumberServiceImplTests {
     @Test
     @DisplayName("getNextNumber возвращает первый номер из справочника номеров для пустой базы")
     void getNextNumberForEmptyBaseReturnExpectedResult(){
-        List<String> listDictionary = new DictionaryLetterCombinations().getDictionary();
+        List<String> listDictionary = new DictionaryLetterCombinationsImpl().getDictionary();
 
-        when(numberBase.containsKey(REGION_116RUS)).thenReturn(true);
-        when(numberBase.get(REGION_116RUS)).thenReturn(new HashSet<>());
+        when(numberBase.isRegion(REGION_116RUS)).thenReturn(true);
+        when(numberBase.getRegionBase(REGION_116RUS)).thenReturn(new HashSet<>());
         when(dictionary.getElement(0)).thenReturn(listDictionary.get(0));
         when((dictionary.getDictionary())).thenReturn(listDictionary);
 
@@ -91,10 +93,10 @@ public class NumberServiceImplTests {
     @Test
     @DisplayName("getNextNumber возвращает следующий номер из справочника номеров для не пустой базы")
     void getNextNumberForNotEmptyBaseReturnExpectedResult(){
-        List<String> listDictionary = new DictionaryLetterCombinations().getDictionary();
+        List<String> listDictionary = new DictionaryLetterCombinationsImpl().getDictionary();
 
-        when(numberBase.containsKey(REGION_116RUS)).thenReturn(true);
-        when(numberBase.get(REGION_116RUS)).thenReturn(new HashSet<>(Collections.singletonList(listDictionary.get(0) + " " + REGION_116RUS)));
+        when(numberBase.isRegion(REGION_116RUS)).thenReturn(true);
+        when(numberBase.getRegionBase(REGION_116RUS)).thenReturn(new HashSet<>(Collections.singletonList(listDictionary.get(0) + " " + REGION_116RUS)));
         when(dictionary.getElement(0)).thenReturn(listDictionary.get(0));
         when((dictionary.getDictionary())).thenReturn(listDictionary);
 
@@ -107,8 +109,8 @@ public class NumberServiceImplTests {
     void getNextNumberRegionNotFoundReturnExpectedResult(){
         List<String> listDictionary = Collections.singletonList("A000AAA");
 
-        when(numberBase.containsKey(REGION_116RUS)).thenReturn(true);
-        when(numberBase.get(REGION_116RUS)).thenReturn(new HashSet<>(Collections.singletonList(listDictionary.get(0) + " " + REGION_116RUS)));
+        when(numberBase.isRegion(REGION_116RUS)).thenReturn(true);
+        when(numberBase.getRegionBase(REGION_116RUS)).thenReturn(new HashSet<>(Collections.singletonList(listDictionary.get(0) + " " + REGION_116RUS)));
         when(dictionary.getElement(0)).thenReturn(listDictionary.get(0) + " " + REGION_116RUS);
         when(dictionary.getDictionary()).thenReturn(listDictionary);
         when(dictionary.getSize()).thenReturn(1);

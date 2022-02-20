@@ -1,6 +1,9 @@
 package com.irbish.numberhenerator.service;
 
 import com.irbish.numberhenerator.repositories.DictionaryLetterCombinations;
+import com.irbish.numberhenerator.repositories.DictionaryLetterCombinationsImpl;
+import com.irbish.numberhenerator.repositories.NumberBase;
+import com.irbish.numberhenerator.repositories.NumberBaseImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -11,25 +14,23 @@ import static com.irbish.numberhenerator.additional.DefaultString.*;
 @Service
 public class NumberServiceImpl implements NumberService{
 
-    private final HashMap<String, Set<String>> numberBase;
+    private final NumberBase numberBase;
     private final DictionaryLetterCombinations dictionary;
 
     public NumberServiceImpl(){
-        this.numberBase = new HashMap<String, Set<String>>() {{
-            put(REGION_116RUS, new LinkedHashSet<>());
-        }};
-        this.dictionary = new DictionaryLetterCombinations();
+        this.numberBase = new NumberBaseImpl();
+        this.dictionary = new DictionaryLetterCombinationsImpl();
     }
 
-    public NumberServiceImpl(HashMap<String, Set<String>> numberBase, DictionaryLetterCombinations dictionary){
+    public NumberServiceImpl(NumberBase numberBase, DictionaryLetterCombinations dictionary){
         this.numberBase = numberBase;
         this.dictionary = dictionary;
     }
 
     @Override
     public String getRandomNumber(String region) {
-        if (numberBase.containsKey(region)) {
-            Set<String> numberBaseSet = numberBase.get(region);
+        if (numberBase.isRegion(region)) {
+            Set<String> numberBaseSet = numberBase.getRegionBase(region);
             List<String> listOfAvailableNumbers = dictionary.getDictionary().
                     stream().
                     filter(value -> !numberBaseSet.contains(value)).
@@ -37,7 +38,7 @@ public class NumberServiceImpl implements NumberService{
             int sizeListOfAvailableNumbers = listOfAvailableNumbers.size();
             if (sizeListOfAvailableNumbers != 0) {
                 String randomNumber = listOfAvailableNumbers.get((int) (Math.random() * sizeListOfAvailableNumbers)) + " " + region;
-                numberBase.get(region).add(randomNumber);
+                numberBase.getRegionBase(region).add(randomNumber);
                 return randomNumber;
             }
             return THE_NUMBER_ARE_OVER;
@@ -47,10 +48,10 @@ public class NumberServiceImpl implements NumberService{
 
     @Override
     public String getNextNumber(String region) {
-        if (numberBase.containsKey(region)) {
+        if (numberBase.isRegion(region)) {
             String number =  dictionary.getElement(0) + " " + region;
-            if (!numberBase.get(region).isEmpty()) {
-                String lastNumber = numberBase.get(region).stream().skip(numberBase.get(region).size() - 1).findFirst().orElse(null);
+            if (!numberBase.getRegionBase(region).isEmpty()) {
+                String lastNumber = numberBase.getRegionBase(region).stream().skip(numberBase.getRegionBase(region).size() - 1).findFirst().orElse(null);
                 if (lastNumber == null){
                     return BASE_FAIL;
                 }
@@ -64,7 +65,7 @@ public class NumberServiceImpl implements NumberService{
                     return number == null ? THE_NUMBER_ARE_OVER : number;
                 }
             }
-            numberBase.get(region).add(number);
+            numberBase.getRegionBase(region).add(number);
             return number;
         }
         return REGION_NOT_FOUND;
@@ -74,14 +75,14 @@ public class NumberServiceImpl implements NumberService{
         String number = null;
         if (findInDictionary(region, indexNextNumber) != null) {
             number = dictionary.getElement(indexNextNumber) + " " + lastNumberParse[1] + " " + lastNumberParse[2];
-            numberBase.get(region).add(number);
+            numberBase.getRegionBase(region).add(number);
         }
         return number;
     }
 
     private Integer findInDictionary(String region, int index){
         int dictionarySize = dictionary.getSize();
-        Set<String> stringSet = numberBase.get(region);
+        Set<String> stringSet = numberBase.getRegionBase(region);
         while(index < dictionarySize && stringSet.contains(dictionary.getElement(index))){
             index++;
         }

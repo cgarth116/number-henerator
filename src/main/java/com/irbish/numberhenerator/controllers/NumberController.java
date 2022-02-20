@@ -1,7 +1,7 @@
 package com.irbish.numberhenerator.controllers;
 
 import com.irbish.numberhenerator.service.NumberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.irbish.numberhenerator.service.NumberServiceImpl;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,8 +12,7 @@ import static com.irbish.numberhenerator.additional.DefaultString.*;
 @RequestMapping("/number/")
 public class NumberController {
 
-    @Autowired
-    private NumberService numberService;
+    private final NumberService numberService = new NumberServiceImpl();
 
     /**
      * Генерирует случайный номер
