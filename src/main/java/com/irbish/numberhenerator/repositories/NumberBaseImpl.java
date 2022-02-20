@@ -1,11 +1,14 @@
 package com.irbish.numberhenerator.repositories;
 
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static com.irbish.numberhenerator.additional.DefaultString.REGION_116RUS;
 
+@Component
 public class NumberBaseImpl implements NumberBase{
 
     private final HashMap<String, Set<String>> numberBase;
